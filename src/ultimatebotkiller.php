@@ -6,6 +6,7 @@
  *  @version 1.0
  */
 
+namespace Alemalakra\UltimateBotKiller;
 // NGINX and UnSupported Versions.
 
 if (!function_exists('getallheaders')) 
@@ -23,8 +24,6 @@ if (!function_exists('getallheaders'))
        return $headers; 
     } 
 } 
-
-namespace Alemalakra\UltimateBotKiller;
 require('Packer.php');
 
 class UBK {
