@@ -3,21 +3,17 @@
  *  UltimateBotKiller - PHP Library For Block 99.99% of Malicious Bots.
  *
  *  @author Alemalakra
- *  @version 1.0
+ *  @version 2.0
  */
 
 namespace Alemalakra\UltimateBotKiller;
-// NGINX and UnSupported Versions.
 
-if (!function_exists('getallheaders')) 
-{ 
-    function getallheaders() 
-    { 
+// NGINX and No-Supported Versions.
+if (!function_exists('getallheaders')) { 
+    function getallheaders() {
        $headers = array (); 
-       foreach ($_SERVER as $name => $value) 
-       { 
-           if (substr($name, 0, 5) == 'HTTP_') 
-           { 
+       foreach ($_SERVER as $name => $value) { 
+           if (substr($name, 0, 5) == 'HTTP_') { 
                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value; 
            } 
        } 
@@ -105,11 +101,64 @@ class UBK {
 			return false;
 		}
 	}
-	function js($Code) {
-		return '<script>' . $Code . '</script>';
+	function js($jsStr) {
+		$jsStr = preg_replace('~[^"\'\(]// ([^\r\n]*)[^"\'\)]~', '/*$1 */', $jsStr);
+		$jsStr = str_replace("\r", "", $jsStr);
+		$jsStr = str_replace("\n", "", $jsStr);
+		$jsStr = str_replace("\t", "", $jsStr);
+		$jsStr = str_replace(" = ", "=", $jsStr);
+		$jsStr = str_replace(") {", "){", $jsStr);
+		$jsStr = str_replace(" ( ", "(", $jsStr);
+		$jsStr = str_replace(" ) ", ")", $jsStr);
+		$jsStr = str_replace("; ", ";", $jsStr);
+		$jsStr = str_replace("if ", "if", $jsStr);
+		$jsStr = str_replace("for ", "for", $jsStr);
+		$jsStr = str_replace(" >= ", ">=", $jsStr);
+		$jsStr = str_replace(" + ", "+", $jsStr);
+		$jsStr = str_replace(" - ", "-", $jsStr);
+		$jsStr = str_replace(" * ", "*", $jsStr);
+		$jsStr = str_replace(" / ", "/", $jsStr);
+		$jsStr = str_replace(" || ", "||", $jsStr);
+		$jsStr = str_replace(" && ", "&&", $jsStr);
+		$jsStr = str_replace("try ", "try", $jsStr);
+		$jsStr = str_replace(", ", ",", $jsStr);
+		$jsStr = str_replace(" == ", "==", $jsStr);
+		$jsStr = str_replace(" != ", "!=", $jsStr);
+		$jsStr = str_replace(": ", ":", $jsStr);
+		$jsStr = str_replace("  ", "", $jsStr);
+		$jsStr = str_replace("   ", "", $jsStr);
+		$jsStr = str_replace("    ", "", $jsStr);
+		return '<script>' . $jsStr . '</script>';
+	}
+	function server($string) {
+		if (isset($_SERVER[$string])) {
+			return $_SERVER[$string];
+		}
+		return "";
+	}
+	function cutCookie($string) {
+		$five = substr($string, 0, 4);
+		$last = substr($string, -3);
+		return md5($five.$last);
+	}
+	function getNameCookie() {
+		$String = $this->server('HTTP_ACCEPT_LANGUAGE');
+		$String = $String . $this->server('HTTP_USER_AGENT');
+		$String = $String . $this->server('SCRIPT_FILENAME');
+		$String = $String . $this->server('HTTP_ACCEPT_ENCODING');
+		$String = $String . $this->server('HTTP_ACCEPT');
+		$String = $String . $this->cutGua($this->gua());
+		return $this->cutCookie(hash('sha512', $String)); // 128 Chars.
+	}
+	function setCookie() {
+		$boolean = rand(0,1) == 1;
+		if ($boolean == true) {
+			return 'document.cookie = '. "'" .'UBK-'. $this->getNameCookie() .'='.$this->getCSRF(). "'" . ';';
+		}
+		return 'document.cookie = "UBK-'. $this->getNameCookie() .'='.$this->getCSRF().'";';
 	}
 	function getCode() {
-		return "document.getElementById('" . $this->cutGua($this->gua()) . "').value = '". $this->getCSRF() ."'; document.getElementById('" . $this->cutGua($this->gua()) . "').name = '". $this->getCSRF() ."';";
+		return $this->setCookie() . "document.getElementById('" . $this->cutGua($this->gua()) . "').value = '". $this->getCSRF() ."'; document.getElementById('" . $this->cutGua($this->gua()) . "').name = '". $this->getCSRF() ."';";
 	}
 	function getInput($_s) {
 		$boolean = rand(0,1) == 1;
@@ -124,6 +173,22 @@ class UBK {
 		}
 		if (!($this->verifyCSRF($_POST[$this->getCSRF()]))) {
 			return false;
+		}
+		if (!(isset($_COOKIE['UBK-' . $this->getNameCookie()]))) {
+			return false;
+		} else {
+			// check it
+			$CookieValue = $_COOKIE['UBK-' . $this->getNameCookie()];
+			$CookieValue = $this->cutCookie($CookieValue);
+			$Check = $this->cutCookie($this->getCSRF());
+			if (!($CookieValue == $Check)) {
+				return false;
+			}
+		}
+		foreach ($_COOKIE as $key => $value) {
+			if (strpos($key, 'UBK-') !== false) {
+			    setcookie ($key, "", time() - 3600);
+			}
 		}
 		return true;
 	}
