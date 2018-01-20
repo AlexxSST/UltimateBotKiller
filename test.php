@@ -3,7 +3,7 @@
  *  UltimateBotKiller - PHP Library For Block 99.99% of Malicious Bots.
  *
  *  @author Alemalakra
- *  @version 1.0
+ *  @version 2.0
  */
 
 // Load class, and load it.
@@ -30,11 +30,9 @@ for ($i=0; $i < rand(3,10); $i++) {
 }
 ?>
 <center>
-	<br><br><br><br><br><br>
 	<form method="post">
 		Sample Input: <input type="text" name="someinput" value="Any form input" />
 		<?php echo $UBK->getInput($_s); ?>
-		<br>
 		<button type="submit">Submit Form POST</button>
 	</form>
 </center>
