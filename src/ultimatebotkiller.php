@@ -24,8 +24,8 @@ require('Packer.php');
 
 class UBK {
 	function __construct() {
-		session_start();
-		ob_start();
+		@session_start();
+		@ob_start();
 	}
 	function gua() {
 		if (isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -156,7 +156,7 @@ class UBK {
 			return 'document.cookie = '. "'" .'UBK-'. $this->getNameCookie() .'='.$this->getCSRF(). "'" . ';';
 		}
 		return 'document.cookie = "UBK-'. $this->getNameCookie() .'='.$this->getCSRF().'";';
-	}
+	}	
 	function getCode() {
 		return $this->setCookie() . "document.getElementById('" . $this->cutGua($this->gua()) . "').value = '". $this->getCSRF() ."'; document.getElementById('" . $this->cutGua($this->gua()) . "').name = '". $this->getCSRF() ."';";
 	}
@@ -176,14 +176,6 @@ class UBK {
 		}
 		if (!(isset($_COOKIE['UBK-' . $this->getNameCookie()]))) {
 			return false;
-		} else {
-			// check it
-			$CookieValue = $_COOKIE['UBK-' . $this->getNameCookie()];
-			$CookieValue = $this->cutCookie($CookieValue);
-			$Check = $this->cutCookie($this->getCSRF());
-			if (!($CookieValue == $Check)) {
-				return false;
-			}
 		}
 		foreach ($_COOKIE as $key => $value) {
 			if (strpos($key, 'UBK-') !== false) {
