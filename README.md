@@ -35,7 +35,7 @@ for ($i = 0; $i < rand(3, 10); $i++) {
         $_s = new Packer($UBK->getCode(), 'Normal', true, false, true);
         $_s = $_s->pack();
         $_s = $_j->ubk($_s);
-    }
+    } 
 }
 // After check if the form was sent.
 $FormInput1 = $UBK->getNameInput('somepostinput');
