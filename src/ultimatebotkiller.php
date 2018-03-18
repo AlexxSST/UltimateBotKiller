@@ -3,12 +3,12 @@
  *  UltimateBotKiller - PHP Library For Block 99.99% of Malicious Bots.
  *
  *  @author Alemalakra
- *  @version 2.0
+ *  @version 3.0
  */
 
 namespace Alemalakra\UltimateBotKiller;
 
-// NGINX and No-Supported Versions.
+// NGINX PHP-FPM and No-Supported Versions.
 if (!function_exists('getallheaders')) { 
     function getallheaders() {
        $headers = array (); 
@@ -130,6 +130,15 @@ class UBK {
 		$jsStr = str_replace("    ", "", $jsStr);
 		return '<script>' . $jsStr . '</script>';
 	}
+	function generateRandomString($length = 10) {
+	    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	    $charactersLength = strlen($characters);
+	    $randomString = '';
+	    for ($i = 0; $i < $length; $i++) {
+	        $randomString .= $characters[rand(0, $charactersLength - 1)];
+	    }
+	    return $randomString;
+	}
 	function server($string) {
 		if (isset($_SERVER[$string])) {
 			return $_SERVER[$string];
@@ -156,11 +165,30 @@ class UBK {
 			return 'document.cookie = '. "'" .'UBK-'. $this->getNameCookie() .'='.$this->getCSRF(). "'" . ';';
 		}
 		return 'document.cookie = "UBK-'. $this->getNameCookie() .'='.$this->getCSRF().'";';
-	}	
+	}
 	function getCode() {
 		return $this->setCookie() . "document.getElementById('" . $this->cutGua($this->gua()) . "').value = '". $this->getCSRF() ."'; document.getElementById('" . $this->cutGua($this->gua()) . "').name = '". $this->getCSRF() ."';";
 	}
-	function getInput($_s) {
+	function getValueInput($name) {
+		foreach ($_SESSION as $key => $value) {
+			if (strpos($key, 'NF-') !== false) {
+			    $key = str_replace('NF-', '', $key);
+			    if ($key == $name) {
+			    	if (isset($_REQUEST[$value])) {
+			    		return $_REQUEST[$value];
+			    	}
+			    	return false;
+			    }
+			}
+		}
+	}
+	function getNameInput($Name) {
+		$k = $this->generateRandomString(rand(15, 40));
+		$_SESSION['NF-' . $Name] = $k;
+		$this->FormNames[$k] = $Name;
+		return $k;
+	}
+	function getInputBotKiller($_s) {
 		$boolean = rand(0,1) == 1;
 		if ($boolean == true) {
 			return '<input type="hidden" id='. "'" . $this->cutGua($this->gua()) . "'" . " />" . $this->js($_s);
